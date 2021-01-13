@@ -100,10 +100,10 @@ def vers(x1):
                 losungstext = aktuell[2] + ' ' + aktuell[1]
                 lehrtext = aktuell[4] + ' ' + aktuell[3]
 
-    print("heute:\t\t" + heute)
-    print("Losung:\t\t" +losungstext)
-    print("Lehrtextt\t:" +lehrtext)
-    print("Jetzt:\t\t" + jetzt)
+    #print("heute:\t\t" + heute)
+    #print("Losung:\t\t" +losungstext)
+    #print("Lehrtextt\t:" +lehrtext)
+    #print("Jetzt:\t\t" + jetzt)
     f.close()
     
     if x1 <= 60:
@@ -113,7 +113,7 @@ def vers(x1):
     
     y = 0
     l = 0
-    max_line_width =45  # für den automatischen Zeilenumbruch
+    max_line_width = 48  # für den automatischen Zeilenumbruch
 
     #global scroll
  
