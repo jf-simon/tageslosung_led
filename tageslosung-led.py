@@ -160,7 +160,7 @@ def temp():
     #res = os.popen("vcgencmd measure_temp").readline()
     #temp = res.replace("temp=","")
     #temp = temp.replace("''C\n", "")
-    graphics.DrawText(offscreen_canvas, font, 2, matrix.height - 1, textColor, "22.5 °C")
+    graphics.DrawText(offscreen_canvas, font, 2, matrix.height - 1, textColor, "22.5°C")
 
 def air():
     # bme280 temp/pressure/humidity sensor
