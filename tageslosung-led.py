@@ -92,17 +92,18 @@ def vers(x1):
     jetzt = aktuellesDatum.strftime('%d.%m.%Y')
     if heute != jetzt:
         for x in f:
-            somestring = f.readline()
-            if jetzt in somestring:
-                somestring = somestring.strip('\n')
-                aktuell = somestring.split('\t')
+            #somestring = f.readline()
+            if jetzt in x:
+                x = x.rstrip('\n')
+                aktuell = x.split('\t')
                 heute = aktuell[0]
                 losungstext = aktuell[2] + ' ' + aktuell[1]
                 lehrtext = aktuell[4] + ' ' + aktuell[3]
 
-    #print("heute:" + heute)
-    print("Losung:" +losungstext)
-    #print("Jetzt:" + jetzt)
+    print("heute:\t\t" + heute)
+    print("Losung:\t\t" +losungstext)
+    print("Lehrtextt\t:" +lehrtext)
+    print("Jetzt:\t\t" + jetzt)
     f.close()
     
     if x1 <= 60:
