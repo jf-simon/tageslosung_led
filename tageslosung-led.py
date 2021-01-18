@@ -9,10 +9,13 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 from PIL import Image
 from datetime import datetime
 
-#import bme280
+from smbus2 import SMBus
+from bme280 import BME280
 
 
 
+bus = SMBus(2)
+bme280 = BME280(i2c_dev=bus)
 
 
 #if len(sys.argv) < 2:
@@ -30,7 +33,7 @@ options.chain_length = 1
 options.parallel = 1
 options.hardware_mapping = 'regular'  # If you have an Adafruit HAT: 'adafruit-hat'
 options.gpio_slowdown = 4
-options.brightness = 50
+options.brightness = 25
 #options.disable_hardware_pulsing = 1
 
 matrix = RGBMatrix(options = options)
@@ -40,6 +43,8 @@ scroll = ""
 heute = ""
 losungstext = ""
 lehrtext = ""
+test = 0
+direction = "up"
 
 def cross(i):
     textColor1 = graphics.Color(i,i,i)
@@ -68,19 +73,35 @@ def cross(i):
     graphics.DrawLine(offscreen_canvas, 18, 15, 17, 15, textColor1)
 
 
-def vers(x1):
+def vers(x1, i):
     global offscreen_canvas
     global heute
-    
+    global min
+    global test
+    global direction
+ 
     fake = matrix.CreateFrameCanvas()
     font_Losung = graphics.Font()
+    #font_Losung.LoadFont("fonts/tom-thumb.bdf")
     font_Losung.LoadFont("fonts/4x6.bdf")
-    
     
     font_Lehrtext = graphics.Font()
     font_Lehrtext.LoadFont("fonts/4x6.bdf")
+ 
     
-    textColor = graphics.Color(36,84,110)
+    #if test == 0:
+        #direction = "up"
+    #elif test == 255:
+        #direction = "down"
+        
+    #if direction == "up":
+        #test = test + 1
+    #elif direction == "down":
+        #test = test - 1
+    
+    #z = 84 + test
+    textColor = graphics.Color(235, 177, 52)#36,84,110
+    
     pos = offscreen_canvas.width/3
     global losungstext
     global lehrtext
@@ -94,6 +115,7 @@ def vers(x1):
         for x in f:
             #somestring = f.readline()
             if jetzt in x:
+                x = x.upper()
                 x = x.rstrip('\n')
                 aktuell = x.split('\t')
                 heute = aktuell[0]
@@ -150,7 +172,7 @@ def vers(x1):
         y = y + 1
         
     
-def temp():
+def temp(temperature):
     global offscreen_canvas
     font = graphics.Font()
     font.LoadFont("fonts/4x6.bdf")
@@ -160,34 +182,9 @@ def temp():
     #res = os.popen("vcgencmd measure_temp").readline()
     #temp = res.replace("temp=","")
     #temp = temp.replace("''C\n", "")
-    graphics.DrawText(offscreen_canvas, font, 2, matrix.height - 1, textColor, "22.5°C")
+    graphics.DrawText(offscreen_canvas, font, 2, matrix.height - 1, textColor, temperature)
 
-def air():
-    # bme280 temp/pressure/humidity sensor
-    #(chip_id, chip_version) = bme280.readBME280ID()
-    #print "Chip ID :", chip_id
-    #print "Version :", chip_version
- 
-    #temperature,pressure,humidity = bme280.readBME280All()
- 
-    #print "Temperature : ", temperature, "C"
-    #print "Pressure : ", pressure, "hPa"
-    #print "Humidity : ", humidity, "%"
-    
-    
-    # bh1750 lux sensor
-    DEVICE     = 0x23
-    POWER_DOWN = 0x00
-    POWER_ON   = 0x01
-    RESET      = 0x07
-    bus = smbus.SMBus(1)
 
-    data = bus.read_i2c_block_data(DEVICE,0x20)
-    result=(data[1] + (256 * data[0])) / 1.2
-
-    print (format(result,'.2f') + " lux")
-
-    
 def notify(x):
     global offscreen_canvas
     f = open("/tmp/Nachrichten.txt", "r")
@@ -197,12 +194,23 @@ def notify(x):
     font = graphics.Font()
     font.LoadFont("fonts/4x6.bdf")
     textColor = graphics.Color(255,255,0)
-    #print(z)
+
+
+
+    temperature = bme280.get_temperature()
+    pressure = bme280.get_pressure()
+    humidity = bme280.get_humidity()
+    #print('{:0.1f}°C {:05.1f}hPa {:05.1f}%'.format(temperature, pressure, humidity))
+    #temp(temperature)
     
-    if z == "0":
-        if x <= 25:
-            temp()
-        elif x <= 30 and x > 25:
+    if z == "0" or z == "":
+        if x >= 1 and x <= 9:
+            temp('{:0.1f}°C'.format(temperature))
+        elif x >= 10 and x <= 18:
+            temp('{:03.0f}hPa'.format(pressure))
+        elif x >= 19 and x <= 27:
+            temp('{:0.1f}%'.format(humidity))
+        elif x > 27 and x <= 30:
             datum()
     else:
         graphics.DrawText(offscreen_canvas, font, 4, matrix.height - 1, textColor,  "-> " + z)
@@ -264,7 +272,7 @@ try:
     while True:
         offscreen_canvas.Clear()
         cross(i)
-        vers(x1)
+        vers(x1, i)
         uhr()
         notify(x)
         #air()
